@@ -4,7 +4,7 @@
 To Create a working physical simulator and to generate a maze on a sever that is playable on the client.
 
 ## SKILLS DEMONSTRATED
-### Physics:
+### Physics
 Linear and Angular Newtonian solver.
 Collision Detection with basic shapes
 Basic CPU-modelled soft body.
