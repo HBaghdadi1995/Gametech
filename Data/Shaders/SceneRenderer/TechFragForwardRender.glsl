@@ -1,5 +1,5 @@
 #version 330 core
-#define SHADOWMAP_NUM  3
+#define SHADOWMAP_NUM  4
 
 //Per object
 uniform sampler2D  	uDiffuseTex;
@@ -26,7 +26,7 @@ in Vertex	{
 
 out vec4 OutFrag;
 
-const float NORMAL_BIAS = 0.002f;
+const float NORMAL_BIAS = 0.003f;
 const float RAW_BIAS 	= 0.00025f;
 
 float DoShadowTest(vec3 tsShadow, int tsLayer, vec2 pix)

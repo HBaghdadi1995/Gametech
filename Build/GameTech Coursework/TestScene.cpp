@@ -46,9 +46,12 @@ void TestScene::OnInitializeScene()
 	//<--- SCENE CREATION --->
 	//Create Ground
 	GameObject* ground = BuildCuboidObject("Ground", Vector3(0.0f, -1.0f, 0.0f), Vector3(20.0f, 1.0f, 20.0f), true, 0.0f, true, false, Vector4(0.2f, 0.5f, 1.0f, 1.0f));
+	PhysicsEngine::Instance()->octree = new Octree(ground->Physics()->GetPosition() - Vector3(ground->Physics()->GetCollisionShape()->GetRadius(), ground->Physics()->GetCollisionShape()->GetRadius(), ground->Physics()->GetCollisionShape()->GetRadius()), Vector3(ground->Physics()->GetCollisionShape()->GetRadius() * 2, ground->Physics()->GetCollisionShape()->GetRadius() *10, ground->Physics()->GetCollisionShape()->GetRadius() * 2));
 	this->AddGameObject(ground);
 
 	//Create Player (See OnUpdateScene)
+	//m_pPlayer->SetRender(new RenderNode(new OBJMesh(MESHDIR"trex.obj")));
+
 	m_pPlayer = BuildCuboidObject(
 		"Player1",					// Optional: Name
 		Vector3(5.f, 0.5f, 0.0f),	// Position
@@ -57,7 +60,8 @@ void TestScene::OnInitializeScene()
 		0.f,						// Physical Mass (must have physics enabled)
 		true,						// Physically Collidable (has collision shape)
 		false,						// Dragable by user?
-		Vector4(0.1f, 0.1f, 0.1f, 1.0f)); // Render color
+		Vector4(0.1f, 0.1f, 0.1f, 1.0f)); // Render color*/
+										  //m_pPlayer->SetRender(new RenderNode(new OBJMesh(MESHDIR"trex.obj")));
 	this->AddGameObject(m_pPlayer);
 
 
@@ -73,7 +77,7 @@ void TestScene::OnInitializeScene()
 				Vector3 pos = offset + Vector3(x * cubewidth, 1e-3f + y * cubewidth, cubewidth * (idx % 2 == 0) ? 0.5f : -0.5f);
 
 				GameObject* cube = BuildCuboidObject(
-					"",						// Optional: Name
+					"Bad Target",						// Optional: Name
 					pos,					// Position
 					halfdims,				// Half-Dimensions
 					true,					// Physics Enabled?
@@ -113,6 +117,65 @@ void TestScene::OnInitializeScene()
 		}
 	};
 
+	auto create_soft_body = [&](const Vector3& offset, const Vector3& scale, float ballsize)
+	{
+		const int dims = 15;
+		const Vector4 col = Vector4(1.0f, 0.5f, 0.2f, 1.0f);
+
+		GameObject *objects[dims][dims];
+
+		for (int x = 0; x < dims; ++x)
+		{
+			for (int y = 0; y < dims; ++y)
+			{
+				Vector3 pos = offset + Vector3(scale.x *x, scale.y * y, scale.z);
+				GameObject* sphere;
+				if ((x == 0 || x == dims - 1) && y == dims - 1) {
+					sphere = BuildSphereObject(
+						"soft_body",					// Optional: Name
+						pos,				// Position
+						ballsize,			// Half-Dimensions
+						true,				// Physics Enabled?
+						0.0f,				// Physical Mass (must have physics enabled)
+						true,				// Physically Collidable (has collision shape)
+						true,				// Dragable by user?
+						col);// Render color
+					objects[x][y] = sphere;
+				}
+				else {
+					sphere = BuildSphereObject(
+						"soft_body",					// Optional: Name
+						pos,				// Position
+						ballsize,			// Half-Dimensions
+						true,				// Physics Enabled?
+						10.f,				// Physical Mass (must have physics enabled)
+						true,				// Physically Collidable (has collision shape)
+						true,				// Dragable by user?
+						col);// Render color
+					objects[x][y] = sphere;
+				}
+				//sphere->Physics()->SetElasticity(0.1);
+				if (x != 0) {
+					GameObject* obj1 = objects[x][y];
+					GameObject* obj2 = objects[x - 1][y];
+
+
+					Constraint *c = new DistanceConstraint(obj1->Physics(), obj2->Physics(), obj1->Physics()->GetPosition(), obj2->Physics()->GetPosition());
+					PhysicsEngine::Instance()->AddConstraint(c);
+				}
+				if (y != 0) {
+					GameObject* obj1 = objects[x][y];
+					GameObject* obj2 = objects[x][y - 1];
+
+
+					Constraint *c = new DistanceConstraint(obj1->Physics(), obj2->Physics(), obj1->Physics()->GetPosition(), obj2->Physics()->GetPosition());
+					PhysicsEngine::Instance()->AddConstraint(c);
+				}
+				this->AddGameObject(sphere);
+			}
+		}
+	};
+
 	//Create Cube Towers
 	create_cube_tower(Vector3(3.0f, 0.5f, 3.0f), 1.0f);
 	create_cube_tower(Vector3(-3.0f, 0.5f, -3.0f), 1.0f);
@@ -123,17 +186,39 @@ void TestScene::OnInitializeScene()
 	create_ball_cube(Vector3(-8.0f, 0.5f, -12.0f), Vector3(0.2f, 0.2f, 0.2f), 0.1f);
 	create_ball_cube(Vector3(8.0f, 0.5f, -12.0f), Vector3(0.5f, 0.5f, 0.5f), 0.1f);
 
-	GameObject* sphere = BuildCuboidObject("", Vector3(10.0, 10.0, 0.0), Vector3(1.0f,1.0f,1.0f), true, 10.0f, true, true, Vector4(1, 0, 0, 1));
+	create_soft_body(Vector3(10.0f, 10.0f, 10.0f), Vector3(0.25f, 0.25f, 0.25f), 0.1f);
+
+	GameObject* sphere = BuildCuboidObject("Good Target", Vector3(10.0, 10.0, 0.0), Vector3(1.0f, 1.0f, 1.0f), true, 10.0f, true, true, Vector4(1, 0, 0, 1));
 	this->AddGameObject(sphere);
 
 	GameObject* p = BuildSphereObject("", Vector3(0.0f, 10.0f, 0.0f), 1.0f, true, 0, true, true, Vector4(0, 1, 0, 1));
 
 	this->AddGameObject(p);
 
-	Constraint *c = new DistanceConstraint(p->Physics(),sphere->Physics(), p->Physics()->GetPosition(), sphere->Physics()->GetPosition());
+	Constraint *c = new DistanceConstraint(p->Physics(), sphere->Physics(), p->Physics()->GetPosition(), sphere->Physics()->GetPosition());
 
 	PhysicsEngine::Instance()->AddConstraint(c);
 	//PhysicsEngine::Instance()->SetGravity(Vector3(0.0f, 0.81f, 0.0f));
+
+	GameObject* MultiMesh = BuildCombinedObject("Good Target", Vector3(10.0, 15.0, 0.0), 1.0f, true, 10.0f, true, true, Vector4(1, 0, 0, 1));
+
+	this->AddGameObject(MultiMesh);
+
+	S_texture = SOIL_load_OGL_texture(TEXTUREDIR"TexturesCom_WoodBamboo0084_4_XL.jpg", SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID, SOIL_FLAG_COMPRESS_TO_DXT);
+
+	if (S_texture)
+	{
+		glBindTexture(GL_TEXTURE_2D, S_texture);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST); //No linear interpolation to get crisp checkerboard no matter the scalling
+		glBindTexture(GL_TEXTURE_2D, 0);
+	}
+	else
+	{
+		NCLERROR("Unable to load checkerboard texture!");
+	}
 }
 
 void TestScene::OnCleanupScene()
@@ -152,6 +237,7 @@ void TestScene::OnUpdateScene(float dt)
 	NCLDebug::AddStatusEntry(Vector4(1.0f, 0.4f, 0.4f, 1.0f), "   You can move the black car with the arrow keys");
 
 	// You can print text using 'printf' formatting
+	//bool donkeys = true;
 	bool donkeys = false;
 	NCLDebug::AddStatusEntry(Vector4(1.0f, 0.4f, 0.4f, 1.0f), "   The %s in this scene are dragable", donkeys ? "donkeys" : "cubes");
 	NCLDebug::AddStatusEntry(Vector4(1.0f, 0.4f, 0.4f, 1.0f), "   - Left click to move");
@@ -191,7 +277,7 @@ void TestScene::OnUpdateScene(float dt)
 				Quaternion::AxisAngleToQuaterion(Vector3(0.0f, 1.0f, 0.0f), -rot_speed));
 		}
 
-		if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_Z))
+		if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_J))
 			SpawnSphere();
 
 
@@ -214,7 +300,7 @@ void TestScene::OnUpdateScene(float dt)
 }
 
 void TestScene::SpawnSphere() {
-	GameObject* sphere = BuildSphereObject("", GraphicsPipeline::Instance()->GetCamera()->GetPosition(), 1.0f, true, 10.0f, true, true, Vector4(1, 0, 0, 1));
-	sphere->Physics()->SetForce(Matrix3::Transpose(GraphicsPipeline::Instance()->GetCamera()->BuildViewMatrix()) * Vector3(0,0,-1) * 10);
+	GameObject* sphere = BuildSphereObject("Spawn", GraphicsPipeline::Instance()->GetCamera()->GetPosition(), 1.0f, true, 10.0f, true, true, Vector4(1, 0, 0, 1), S_texture);
+	sphere->Physics()->SetLinearVelocity(Matrix3::Transpose(GraphicsPipeline::Instance()->GetCamera()->BuildViewMatrix()) * Vector3(0, 0, -1) * 100);
 	this->AddGameObject(sphere);
 }

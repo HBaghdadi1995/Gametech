@@ -1,36 +1,36 @@
 /******************************************************************************
 Class: PhysicsEngine
 Implements:
-Author: 
-	Pieran Marris      <p.marris@newcastle.ac.uk> and YOU!
+Author:
+Pieran Marris      <p.marris@newcastle.ac.uk> and YOU!
 Description:
 
-	The glue that brings all our physics dreams together. This class is provided
-	pretty much as is, as most of the sub-systems are tied in to this already
-	with a bit of debugging code to visualise various parts of the physics engine.
+The glue that brings all our physics dreams together. This class is provided
+pretty much as is, as most of the sub-systems are tied in to this already
+with a bit of debugging code to visualise various parts of the physics engine.
 
-	The general runtime consists of:
-		- Update(float dt)
-		  - UpdatePhysics()
-			 - Broadphase Collision Detection
-			   Quickly identifies possible collisions in between objects, hopefully
-			   with world space partitioning systems like Octrees.. but currently just
-			   builds a list colliding all objects with all other objects. (Hopefully you
-			   can find some free time to fix this =] )
+The general runtime consists of:
+- Update(float dt)
+- UpdatePhysics()
+- Broadphase Collision Detection
+Quickly identifies possible collisions in between objects, hopefully
+with world space partitioning systems like Octrees.. but currently just
+builds a list colliding all objects with all other objects. (Hopefully you
+can find some free time to fix this =] )
 
-			 - Narrowphase Collision Detection
-			   Takes the list provided by the broadphase collision detection and 
-			   accurately collides all objects, building a collision manifold as
-			   required. (Tutorial 4/5)
+- Narrowphase Collision Detection
+Takes the list provided by the broadphase collision detection and
+accurately collides all objects, building a collision manifold as
+required. (Tutorial 4/5)
 
-			 - Solve Constraints & Collisions
-			   Solves all velocity constraints in the physics system, these include
-			   both Collision Constraints (Tutorial 5,6) and misc world constraints
-			   like distance constraints (Tutorial 3)
+- Solve Constraints & Collisions
+Solves all velocity constraints in the physics system, these include
+both Collision Constraints (Tutorial 5,6) and misc world constraints
+like distance constraints (Tutorial 3)
 
-			 - Update Physics Objects
-			   Moves all physics objects through time, updating positions/rotations
-			   etc. each iteration (Tutorial 2)
+- Update Physics Objects
+Moves all physics objects through time, updating positions/rotations
+etc. each iteration (Tutorial 2)
 
 *//////////////////////////////////////////////////////////////////////////////
 
@@ -42,6 +42,9 @@ Description:
 #include <nclgl\PerfTimer.h>
 #include <vector>
 #include <mutex>
+#include "Octree.h"
+//#include <cuda_runtime.h>
+//#include <device_launch_parameters.h>
 
 
 //Number of jacobi iterations to apply in order to
@@ -51,8 +54,8 @@ Description:
 
 //Just saves including windows.h for the sake of defining true/false
 #ifndef FALSE
-	#define FALSE	0
-	#define TRUE	1
+#define FALSE	0
+#define TRUE	1
 #endif
 
 //Debugging flags to let the engine know what to debugging information should be drawn
@@ -70,7 +73,7 @@ struct CollisionPair	//Forms the output of the broadphase collision detection
 
 class PhysicsEngine : public TSingleton<PhysicsEngine>
 {
-	friend class TSingleton < PhysicsEngine > ;
+	friend class TSingleton < PhysicsEngine >;
 public:
 	//Reset Default Values like gravity/timestep - called when scene is switched out
 	void SetDefaults();
@@ -80,43 +83,47 @@ public:
 	void RemovePhysicsObject(PhysicsNode* obj);
 	void RemoveAllPhysicsObjects(); //Delete all physics entities etc and reset-physics environment for new scene to be initialized
 
-	//Add Constraints
+									//Add Constraints
 	void AddConstraint(Constraint* c) { constraints.push_back(c); }
-	
+
 
 	//Update Physics Engine
 	void Update(float deltaTime);			//DeltaTime here is 'seconds' since last update not milliseconds
-	
-	//Debug draw all physics objects, manifolds and constraints
+
+											//Debug draw all physics objects, manifolds and constraints
 	void DebugRender();
 
 
 
 	//Getters / Setters 
-	inline bool IsPaused() const				{ return isPaused; }
-	inline void SetPaused(bool paused)			{ isPaused = paused; }
+	inline bool IsPaused() const { return isPaused; }
+	inline void SetPaused(bool paused) { isPaused = paused; }
 
-	inline uint GetDebugDrawFlags() const { return debugDrawFlags;  }
-	inline void SetDebugDrawFlags(uint flags)   { debugDrawFlags = flags; }
-	
+	inline uint GetDebugDrawFlags() const { return debugDrawFlags; }
+	inline void SetDebugDrawFlags(uint flags) { debugDrawFlags = flags; }
+
 	inline float GetUpdateTimestep() const { return updateTimestep; }
 	inline void SetUpdateTimestep(float updateTimestep) { updateTimestep = updateTimestep; }
 
-	inline const Vector3& GetGravity() const	{ return gravity; }
-	inline void SetGravity(const Vector3& g)	{ gravity = g; }
+	inline const Vector3& GetGravity() const { return gravity; }
+	inline void SetGravity(const Vector3& g) { gravity = g; }
 
-	inline float GetDampingFactor() const		{ return dampingFactor; }
-	inline void  SetDampingFactor(float d)		{ dampingFactor = d; }
+	inline float GetDampingFactor() const { return dampingFactor; }
+	inline void  SetDampingFactor(float d) { dampingFactor = d; }
 
-	inline float GetDeltaTime() const			{ return updateTimestep; }
+	inline float GetDeltaTime() const { return updateTimestep; }
 
 	void PrintPerformanceTimers(const Vector4& color)
 	{
-		perfUpdate.PrintOutputToStatusEntry(color,		"    Integration :");
-		perfBroadphase.PrintOutputToStatusEntry(color,	"    Broadphase  :");
-		perfNarrowphase.PrintOutputToStatusEntry(color,	"    Narrowphase :");
-		perfSolver.PrintOutputToStatusEntry(color,		"    Solver      :");
+		perfUpdate.PrintOutputToStatusEntry(color, "    Integration :");
+		perfBroadphase.PrintOutputToStatusEntry(color, "    Broadphase  :");
+		perfNarrowphase.PrintOutputToStatusEntry(color, "    Narrowphase :");
+		perfSolver.PrintOutputToStatusEntry(color, "    Solver      :");
 	}
+
+	inline int GetScore() { return score; }
+
+	Octree* octree;
 
 protected:
 	PhysicsEngine();
@@ -129,7 +136,7 @@ protected:
 	void BroadPhaseCollisions();
 
 	//Handles narrowphase collision detection
-	void NarrowPhaseCollisions();
+	virtual void NarrowPhaseCollisions();
 
 protected:
 	bool		isPaused;
@@ -151,4 +158,8 @@ protected:
 	PerfTimer perfBroadphase;
 	PerfTimer perfNarrowphase;
 	PerfTimer perfSolver;
+
+	int score = 0;
+
+	void OctreeCull(Octree*);
 };

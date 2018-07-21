@@ -247,10 +247,10 @@ void GraphicsPipeline::RenderScene()
 		glClear(GL_DEPTH_BUFFER_BIT);
 
 		glUseProgram(shaderShadow->GetProgram());
-		glUniformMatrix4fv(glGetUniformLocation(shaderShadow->GetProgram(), "uShadowTransform[0]"), SHADOWMAP_NUM, GL_FALSE, (float*)&shadowProj[0]);
+		glUniformMatrix4fv(glGetUniformLocation(shaderShadow->GetProgram(), "uShadowTransform[0]"), SHADOWMAP_NUM, GL_FALSE, (float*)&shadowProjView[0]);
 		GLint uModelMtx = glGetUniformLocation(shaderShadow->GetProgram(), "uModelMtx");
 
-		RenderAllObjects(false,
+		RenderAllObjects(true,
 			[&](RenderNode* node)
 			{
 				glUniformMatrix4fv(uModelMtx, 1, GL_FALSE, (float*)&node->GetWorldTransform());
@@ -275,7 +275,7 @@ void GraphicsPipeline::RenderScene()
 		glUniform1fv(glGetUniformLocation(shaderForwardLighting->GetProgram(), "uSpecularFactor"), 1, &specularFactor);
 
 		glUniform1fv(glGetUniformLocation(shaderForwardLighting->GetProgram(), "uNormalizedFarPlanes[0]"), SHADOWMAP_NUM - 1, (float*)&normalizedFarPlanes[0]);
-		glUniformMatrix4fv(glGetUniformLocation(shaderForwardLighting->GetProgram(), "uShadowTransform[0]"), SHADOWMAP_NUM, GL_FALSE, (float*)&shadowProj[0]);
+		glUniformMatrix4fv(glGetUniformLocation(shaderForwardLighting->GetProgram(), "uShadowTransform[0]"), SHADOWMAP_NUM, GL_FALSE, (float*)&shadowProjView[0]);
 		glUniform1i(glGetUniformLocation(shaderForwardLighting->GetProgram(), "uShadowTex"), 2);
 		glUniform2f(glGetUniformLocation(shaderForwardLighting->GetProgram(), "uShadowSinglePixel"), 1.f / SHADOWMAP_SIZE, 1.f / SHADOWMAP_SIZE);
 
@@ -283,7 +283,7 @@ void GraphicsPipeline::RenderScene()
 
 		uModelMtx = glGetUniformLocation(shaderForwardLighting->GetProgram(), "uModelMtx");
 		GLint uColor = glGetUniformLocation(shaderForwardLighting->GetProgram(), "uColor");
-		RenderAllObjects(true,
+		RenderAllObjects(false,
 			[&](RenderNode* node)
 			{
 				glUniformMatrix4fv(uModelMtx, 1, GL_FALSE, (float*)&node->GetWorldTransform());
@@ -371,7 +371,7 @@ void GraphicsPipeline::BuildAndSortRenderLists()
 void GraphicsPipeline::RecursiveAddToRenderLists(RenderNode* node)
 {
 	//If the node is renderable, add it to either a opaque or transparent render list
-	if (node->GetMesh())
+	if (node->IsRenderable())
 	{
 		if (node->GetColor().w > 0.999f)
 		{
@@ -391,20 +391,20 @@ void GraphicsPipeline::RecursiveAddToRenderLists(RenderNode* node)
 		RecursiveAddToRenderLists(*itr);
 }
 
-void GraphicsPipeline::RenderAllObjects(bool renderTransparentBothSides, std::function<void(RenderNode*)> perObjectFunc)
+void GraphicsPipeline::RenderAllObjects(bool isShadowPass, std::function<void(RenderNode*)> perObjectFunc)
 {
 	for (RenderNode* node : renderlistOpaque)
 	{
 		perObjectFunc(node);
-		node->GetMesh()->Draw();
+		node->DrawOpenGL(isShadowPass);
 	}
 
-	if (!renderTransparentBothSides)
+	if (isShadowPass)
 	{
 		for (TransparentPair& node : renderlistTransparent)
 		{
 			perObjectFunc(node.first);
-			node.first->GetMesh()->Draw();
+			node.first->DrawOpenGL(isShadowPass);
 		}
 	}
 	else
@@ -413,10 +413,10 @@ void GraphicsPipeline::RenderAllObjects(bool renderTransparentBothSides, std::fu
 		{
 			perObjectFunc(node.first);
 			glCullFace(GL_FRONT);
-			node.first->GetMesh()->Draw();
+			node.first->DrawOpenGL(isShadowPass);
 
 			glCullFace(GL_BACK);
-			node.first->GetMesh()->Draw();
+			node.first->DrawOpenGL(isShadowPass);
 		}
 	}
 }
@@ -430,7 +430,7 @@ void GraphicsPipeline::BuildShadowTransforms()
 	//  Matrix4 lightview = Matrix4::BuildViewMatrix(Vector3(0.0f, 0.0f, 0.0f), -lightDirection, viewDir);	
 
 	//Fixed size shadow area (just moves with camera) 
-	Matrix4 lightview = Matrix4::BuildViewMatrix(Vector3(0.0f, 0.0f, 0.0f), -lightDirection, Vector3(0, 1, 0)); 
+	shadowViewMtx = Matrix4::BuildViewMatrix(Vector3(0.0f, 0.0f, 0.0f), -lightDirection, Vector3(0, 1, 0));
 
 	Matrix4 invCamProjView = Matrix4::Inverse(projMatrix * viewMatrix);
 
@@ -464,13 +464,14 @@ void GraphicsPipeline::BuildShadowTransforms()
 		
 		//Rotate bounding box so it's orientated in the lights direction
 		// - Rotates bounding box and creates a new AABB that encompasses it
-		bb = bb.Transform(lightview);
+		bb = bb.Transform(shadowViewMtx);
 
 		//Extend the Z depths to catch shadow casters outside view frustum
 		bb._min.z = min(bb._min.z, -sceneBoundingRadius);
 		bb._max.z = max(bb._max.z, sceneBoundingRadius);
 
 		//Build Light Projection		
-		shadowProj[i] = Matrix4::Orthographic(bb._max.z, bb._min.z, bb._min.x, bb._max.x, bb._max.y, bb._min.y) * lightview;
+		shadowProj[i] = Matrix4::Orthographic(bb._max.z, bb._min.z, bb._min.x, bb._max.x, bb._max.y, bb._min.y);
+		shadowProjView[i] = shadowProj[i] * shadowViewMtx;
 	}
 }

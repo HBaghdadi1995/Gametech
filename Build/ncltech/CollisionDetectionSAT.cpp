@@ -49,7 +49,7 @@ bool CollisionDetectionSAT::AreColliding(CollisionData* out_coldata)
 	for (const Vector3& axis : axes2) {
 		AddPossibleCollisionAxis(axis);
 	}
-	
+
 	for (const Vector3& norm1 : axes1) {
 		for (const Vector3& norm2 : axes2) {
 			AddPossibleCollisionAxis(Vector3::Cross(norm1, norm2).Normalise());
@@ -130,7 +130,7 @@ bool CollisionDetectionSAT::CheckCollisionAxis(const Vector3& axis, CollisionDat
 
 void CollisionDetectionSAT::GenContactPoints(Manifold* out_manifold)
 {
- /* TUTORIAL 5 CODE */
+	/* TUTORIAL 5 CODE */
 	if (!out_manifold || !areColliding) {
 		return;
 	}

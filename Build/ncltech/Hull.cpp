@@ -128,8 +128,8 @@ int Hull::AddFace(const Vector3& _normal, int nVerts, const int* verts)
 	//Update Contained Vertices
 	for (int i = 0; i < nVerts; ++i)
 	{
-		HullVertex* cVertStart	= &m_vVertices[m_vEdges[new_face_ptr->_edge_ids[i]]._vStart];
-		HullVertex* cVertEnd	= &m_vVertices[m_vEdges[new_face_ptr->_edge_ids[i]]._vEnd];
+		HullVertex* cVertStart = &m_vVertices[m_vEdges[new_face_ptr->_edge_ids[i]]._vStart];
+		HullVertex* cVertEnd = &m_vVertices[m_vEdges[new_face_ptr->_edge_ids[i]]._vEnd];
 
 		auto foundLocStart = std::find(cVertStart->_enclosing_faces.begin(), cVertStart->_enclosing_faces.end(), new_face._idx);
 		if (foundLocStart == cVertStart->_enclosing_faces.end())
@@ -163,7 +163,7 @@ void Hull::RemoveFace(int faceidx)
 			}
 			edge->_enclosing_faces.clear();
 			edge->_adjoining_edge_ids.clear();
-		}		
+		}
 		else
 			edge->_enclosing_faces.erase(std::remove(edge->_enclosing_faces.begin(), edge->_enclosing_faces.end(), faceidx));
 	}

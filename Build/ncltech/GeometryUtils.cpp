@@ -116,7 +116,7 @@ bool GeometryUtils::PlaneEdgeIntersection(
 		float fac = -Vector3::Dot(plane.GetNormal(), start - p_co) / ab_p;
 
 		//Stop any large floating point divide issues with almost parallel planes
-		fac = min(max(fac, 0.0f), 1.0f); 
+		fac = min(max(fac, 0.0f), 1.0f);
 
 		//Return point on edge
 		out_point = start + ab * fac;

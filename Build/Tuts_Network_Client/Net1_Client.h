@@ -3,6 +3,9 @@
 
 #include <ncltech\Scene.h>
 #include <ncltech\NetworkBase.h>
+#include "MazeGenerator.h"
+#include "MazeRenderer.h"
+#include <nclgl\OBJMesh.h>
 
 //Basic Network Example
 
@@ -18,9 +21,43 @@ public:
 
 	void ProcessNetworkEvent(const ENetEvent& evnt);
 
+	void GenerateNewMaze();
+
+	void SetGridSize(int i) { grid_size = i; }
+
+	void InterpretPath(string);
+
 protected:
-	GameObject* box;
+	Mesh* wallmesh;
+
+	//GameObject* box;
 
 	NetworkBase network;
 	ENetPeer*	serverConnection;
+
+	MazeGenerator* mazeGenerator;
+
+	MazeRenderer*	maze;
+
+	void ResetScene();
+	void SendCoord();
+	void SendPath();
+
+	int grid_size = 16;
+
+	SearchHistory searchHistory;
+
+	bool showPath = false;
+
+	string path;
+
+	void SetAvatars(string);
+	vector<Vector3> avatars;
+
+	void DrawAvatars();
+
+	GameObject** cubeAvatars = new GameObject*[10];
+
+	void SendSizeSmaller();
+	void SendSizeBigger();
 };

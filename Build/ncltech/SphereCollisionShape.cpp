@@ -24,7 +24,7 @@ Matrix3 SphereCollisionShape::BuildInverseInertia(float invMass) const
 {
 	//https://en.wikipedia.org/wiki/List_of_moments_of_inertia
 	float i = 2.5f * invMass / (m_Radius * m_Radius); //SOLID
-	//float i = 1.5f * invMass / (m_Radius * m_Radius); //HOLLOW
+													  //float i = 1.5f * invMass / (m_Radius * m_Radius); //HOLLOW
 
 	Matrix3 inertia;
 	inertia._11 = i;
@@ -39,7 +39,7 @@ Matrix3 SphereCollisionShape::BuildInverseInertia(float invMass) const
 void SphereCollisionShape::GetCollisionAxes(const PhysicsNode* otherObject, std::vector<Vector3>& out_axes) const
 {
 	/* There are infinite possible axes on a sphere so we MUST handle it seperately
-		- Luckily we can just get the closest point on the opposite object to our centre and use that.
+	- Luckily we can just get the closest point on the opposite object to our centre and use that.
 	*/
 	Vector3 dir = (otherObject->GetPosition() - Parent()->GetPosition()).Normalise();
 
@@ -74,7 +74,7 @@ void SphereCollisionShape::GetIncidentReferencePolygon(
 {
 	//This is used in Tutorial 5
 	out_face.push_back(Parent()->GetPosition() + axis * m_Radius);
-	out_normal = axis;	
+	out_normal = axis;
 }
 
 void SphereCollisionShape::DebugDraw() const

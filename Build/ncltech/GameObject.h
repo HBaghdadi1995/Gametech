@@ -57,20 +57,20 @@ public:
 
 	//<------- Scene Interation ------>
 	// A good place to handle callback setups etc if you extend GameObject class (See ObjectPlayer for an example)
-	virtual void OnAttachedToScene()	{};
-	virtual void OnDetachedFromScene()	{};
+	virtual void OnAttachedToScene() {};
+	virtual void OnDetachedFromScene() {};
 
 	//<------- Object Parameters ------>
-	inline const std::string& GetName()		{ return friendlyName; }
-	inline const Scene* GetScene() const	{ return scene; }
-	inline		 Scene* GetScene()			{ return scene; }
+	inline const std::string& GetName() { return friendlyName; }
+	inline const Scene* GetScene() const { return scene; }
+	inline		 Scene* GetScene() { return scene; }
 
 
 	//<---------- PHYSICS ------------>
-	inline bool  HasPhysics() const					{ return (physicsNode != NULL); }
-	inline const PhysicsNode*	Physics() const		{ return physicsNode; }
-	inline		 PhysicsNode*	Physics()			{ return physicsNode; }
-	
+	inline bool  HasPhysics() const { return (physicsNode != NULL); }
+	inline const PhysicsNode*	Physics() const { return physicsNode; }
+	inline		 PhysicsNode*	Physics() { return physicsNode; }
+
 	inline void  SetPhysics(PhysicsNode* node)
 	{
 		if (physicsNode)
@@ -90,9 +90,9 @@ public:
 
 
 	//<---------- GRAPHICS ------------>
-	inline bool  HasRender() const						{ return (renderNode != NULL); }
-	inline const RenderNode*	Render() const			{ return renderNode; }
-	inline		 RenderNode*	Render()				{ return renderNode; }
+	inline bool  HasRender() const { return (renderNode != NULL); }
+	inline const RenderNode*	Render() const { return renderNode; }
+	inline		 RenderNode*	Render() { return renderNode; }
 
 	inline void  SetRender(RenderNode* node)
 	{
@@ -137,7 +137,7 @@ public:
 
 
 public:
-	
+
 
 protected:
 	//Scene  

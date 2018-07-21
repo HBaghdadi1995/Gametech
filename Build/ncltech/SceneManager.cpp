@@ -4,7 +4,7 @@
 #include <nclgl\NCLDebug.h>
 #include "GraphicsPipeline.h"
 
-SceneManager::SceneManager() 
+SceneManager::SceneManager()
 	: m_SceneIdx(NULL)
 {
 	CommonMeshes::InitializeMeshes();
@@ -64,7 +64,7 @@ void SceneManager::JumpToScene(int idx)
 	{
 		NCLLOG("[SceneManager] - Exiting scene -");
 		scene->OnCleanupScene();
-		PhysicsEngine::Instance()->RemoveAllPhysicsObjects();	
+		PhysicsEngine::Instance()->RemoveAllPhysicsObjects();
 	}
 
 	m_SceneIdx = idx;

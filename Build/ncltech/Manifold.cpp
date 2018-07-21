@@ -4,7 +4,7 @@
 #include "PhysicsEngine.h"
 #include <algorithm>
 
-Manifold::Manifold() 
+Manifold::Manifold()
 	: pnodeA(NULL)
 	, pnodeB(NULL)
 {
@@ -33,7 +33,7 @@ void Manifold::ApplyImpulse()
 
 
 void Manifold::SolveContactPoint(ContactPoint& c)
-{	
+{
 	/* TUTORIAL 6 CODE */
 	Vector3 r1 = c.relPosA;
 	Vector3 r2 = c.relPosB;
@@ -45,8 +45,8 @@ void Manifold::SolveContactPoint(ContactPoint& c)
 
 	float constraintMass = (pnodeA->GetInverseMass() + pnodeB->GetInverseMass()) +
 		Vector3::Dot(c.colNormal,
-		Vector3::Cross(pnodeA->GetInverseInertia() * Vector3::Cross(r1, c.colNormal), r1) +
-		Vector3::Cross(pnodeB->GetInverseInertia() * Vector3::Cross(r2, c.colNormal), r2));
+			Vector3::Cross(pnodeA->GetInverseInertia() * Vector3::Cross(r1, c.colNormal), r1) +
+			Vector3::Cross(pnodeB->GetInverseInertia() * Vector3::Cross(r2, c.colNormal), r2));
 
 	if (constraintMass > 0.0f) {
 		float jn = max(-Vector3::Dot(dv, c.colNormal) + c.b_term, 0.0f);
@@ -102,7 +102,7 @@ void Manifold::SolveContactPoint(ContactPoint& c)
 void Manifold::PreSolverStep(float dt)
 {
 	std::random_shuffle(contactPoints.begin(), contactPoints.end());
-	
+
 	for (ContactPoint& contact : contactPoints)
 	{
 		UpdateConstraint(contact);
@@ -116,7 +116,7 @@ void Manifold::UpdateConstraint(ContactPoint& c)
 	c.sumImpulseFriction = Vector3(0.0f, 0.0f, 0.0f);
 
 
-	//c.b_term = 0.0f;
+	c.b_term = 0.0f;
 
 	/* TUTORIAL 6 CODE */
 
@@ -128,9 +128,7 @@ void Manifold::UpdateConstraint(ContactPoint& c)
 
 	const float elasticity = pnodeA->GetElasticity() * pnodeB->GetElasticity();
 
-	const float elasticity_term = Vector3::Dot(c.colNormal, pnodeA->GetLinearVelocity());
-
-	pnodeA->GetLinearVelocity() + Vector3::Cross(c.relPosA, pnodeA->GetAngularVelocity()) - pnodeB->GetLinearVelocity() - Vector3::Cross(c.relPosB, pnodeB->GetAngularVelocity());
+	const float elasticity_term = Vector3::Dot(c.colNormal, pnodeA->GetLinearVelocity() + Vector3::Cross(c.relPosA, pnodeA->GetAngularVelocity()) - pnodeB->GetLinearVelocity() - Vector3::Cross(c.relPosB, pnodeB->GetAngularVelocity()));
 
 	c.b_term += (elasticity * elasticity_term) / contactPoints.size();
 }

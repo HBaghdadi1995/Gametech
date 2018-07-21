@@ -8,10 +8,10 @@ Description:
 :README:
 - In order to run this demo, we also need to run "Tuts_Network_Client" at the same time.
 - To do this:-
-	1. right click on the entire solution (top of the solution exporerer) and go to properties
-	2. Go to Common Properties -> Statup Project
-	3. Select Multiple Statup Projects
-	4. Select 'Start with Debugging' for both "Tuts_Network_Client" and "Tuts_Network_Server"
+1. right click on the entire solution (top of the solution exporerer) and go to properties
+2. Go to Common Properties -> Statup Project
+3. Select Multiple Statup Projects
+4. Select 'Start with Debugging' for both "Tuts_Network_Client" and "Tuts_Network_Server"
 
 - Now when you run the program it will build and run both projects at the same time. =]
 - You can also optionally spawn more instances by right clicking on the specific project
@@ -24,10 +24,10 @@ FOR MORE NETWORKING INFORMATION SEE "Tuts_Network_Client -> Net1_Client.h"
 
 
 
-		(\_/)
-		( '_')
-	 /""""""""""""\=========     -----D
-	/"""""""""""""""""""""""\
+(\_/)
+( '_')
+/""""""""""""\=========     -----D
+/"""""""""""""""""""""""\
 ....\_@____@____@____@____@_/
 
 *//////////////////////////////////////////////////////////////////////////////
@@ -39,6 +39,7 @@ FOR MORE NETWORKING INFORMATION SEE "Tuts_Network_Client -> Net1_Client.h"
 #include <nclgl\Vector3.h>
 #include <nclgl\common.h>
 #include <ncltech\NetworkBase.h>
+#include "PathFinder.h"
 
 //Needed to get computer adapter IPv4 addresses via windows
 #include <iphlpapi.h>
@@ -53,14 +54,47 @@ GameTimer timer;
 float accum_time = 0.0f;
 float rotation = 0.0f;
 
+int m_size = 16;
+float density = 0.5f;
 
 void Win32_PrintAllAdapterIPAddresses();
+
+PathFinder *p = new PathFinder("Maze");
 
 int onExit(int exitcode)
 {
 	server.Release();
 	system("pause");
 	exit(exitcode);
+}
+
+void SendMaze() {
+	string m = p->GeneratePacket();
+	const char* c = m.c_str();
+	ENetPacket* position_update = enet_packet_create(c, strlen(c), 0);
+	enet_host_broadcast(server.m_pNetwork, 0, position_update);
+}
+
+void newMaze(int i, float f) {
+	p->GenerateNewMaze(i, f);
+	SendMaze();
+}
+
+void SendPath(ENetPeer *e) {
+	string m = p->GetPathString();
+	const char* c = m.c_str();
+
+	ENetPacket* packet = enet_packet_create(c, strlen(c) + 1, 0);
+	enet_peer_send(e, 0, packet);
+}
+
+void SendAvatars() {
+	//if (p->avatars.size() != 0) {
+		string m = p->avatarPacket + "@@";
+		const char* c = m.c_str();
+		ENetPacket* position_update = enet_packet_create(c, strlen(c), 0);
+		enet_host_broadcast(server.m_pNetwork, 0, position_update);
+	//}
 }
 
 int main(int arcg, char** argv)
@@ -83,24 +117,60 @@ int main(int arcg, char** argv)
 
 	Win32_PrintAllAdapterIPAddresses();
 
+	newMaze(16,0.5);
+
 	timer.GetTimedMS();
 	while (true)
 	{
 		float dt = timer.GetTimedMS() * 0.001f;
 		accum_time += dt;
-		rotation += 0.5f * PI * dt;
 
 		//Handle All Incoming Packets and Send any enqued packets
+		
+		//p->onUpdate();
+
 		server.ServiceNetwork(dt, [&](const ENetEvent& evnt)
 		{
 			switch (evnt.type)
 			{
 			case ENET_EVENT_TYPE_CONNECT:
 				printf("- New Client Connected\n");
+				SendMaze();
 				break;
 
 			case ENET_EVENT_TYPE_RECEIVE:
 				printf("\t Client %d says: %s\n", evnt.peer->incomingPeerID, evnt.packet->data);
+				
+				if (evnt.packet->data[0] == '@')
+				{
+					string s = "";
+					for (int i = 0; i < 5; i++) {
+						s += evnt.packet->data[i+1];
+					}
+					
+					if (s.compare("reset") == 0) {
+						newMaze(m_size,density);
+					}
+					if (s.compare("coord") == 0) {
+						s = (char*)evnt.packet->data;
+						p->CalculatePath(s);
+						SendPath(evnt.peer);
+					}
+					if (s.compare("paths") == 0) {
+						s = (char*)evnt.packet->data;
+						p->AddAvatar(s);
+					}
+					if (s.compare("sizes") == 0) {
+						s = (char*)evnt.packet->data;
+						string integ = "";
+						for (int i = 6; s.at(i) != '@'; i++) {
+							integ += s.at(i);
+						}
+						m_size = stoi(integ);
+						newMaze(m_size, density);
+					}
+				}
+				
 				enet_packet_destroy(evnt.packet);
 				break;
 
@@ -109,24 +179,13 @@ int main(int arcg, char** argv)
 				break;
 			}
 		});
-		
+
 		//Broadcast update packet to all connected clients at a rate of UPDATE_TIMESTEP updates per second
 		if (accum_time >= UPDATE_TIMESTEP)
 		{
-
-			//Packet data
-			// - At the moment this is just a position update that rotates around the origin of the world
-			//   though this can be any variable, structure or class you wish. Just remember that everything 
-			//   you send takes up valuable network bandwidth so no sending every PhysicsObject struct each frame ;)
-			accum_time = 0.0f;
-			Vector3 pos = Vector3(
-				cos(rotation) * 2.0f,
-				1.5f,
-				sin(rotation) * 2.0f);
-
-			//Create the packet and broadcast it (unreliable transport) to all clients
-			ENetPacket* position_update = enet_packet_create(&pos, sizeof(Vector3), 0);
-			enet_host_broadcast(server.m_pNetwork, 0, position_update);
+			p->onUpdate(accum_time);
+			SendAvatars();
+			accum_time = 0;
 		}
 
 		Sleep(0);
@@ -145,7 +204,7 @@ void Win32_PrintAllAdapterIPAddresses()
 {
 	//Initially allocate 5KB of memory to store all adapter info
 	ULONG outBufLen = 5000;
-	
+
 
 	IP_ADAPTER_INFO* pAdapters = NULL;
 	DWORD status = ERROR_BUFFER_OVERFLOW;
@@ -171,7 +230,7 @@ void Win32_PrintAllAdapterIPAddresses()
 		}
 	}
 
-	
+
 	if (pAdapters != NULL)
 	{
 		//Iterate through all Network Adapters, and print all IPv4 addresses associated with them to the console
@@ -190,5 +249,5 @@ void Win32_PrintAllAdapterIPAddresses()
 
 		free(pAdapters);
 	}
-	
+
 }

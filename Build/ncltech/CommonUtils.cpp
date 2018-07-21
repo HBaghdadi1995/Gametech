@@ -46,9 +46,9 @@ void CommonUtils::DragableObjectCallback(GameObject* obj, float dt, const Vector
 
 			obj->Physics()->SetInverseInertia(dragDataInertia);
 			obj->Physics()->SetInverseMass(dragDataMass);
-			
+
 		}
-		else if(!dragDataSet)
+		else if (!dragDataSet)
 		{
 			dragDataSet = true;
 
@@ -106,7 +106,8 @@ GameObject* CommonUtils::BuildSphereObject(
 	float inverse_mass,
 	bool collidable,
 	bool dragable,
-	const Vector4& color)
+	const Vector4& color,
+	GLuint texture)
 {
 	//Due to the way SceneNode/RenderNode's were setup, we have to make a dummy node which has the mesh and scaling transform
 	// and a parent node that will contain the world transform/physics transform
@@ -114,12 +115,17 @@ GameObject* CommonUtils::BuildSphereObject(
 
 	RenderNode* dummy = new RenderNode(CommonMeshes::Sphere(), color);
 	dummy->SetTransform(Matrix4::Scale(Vector3(radius, radius, radius)));
+	if (texture != 0) {
+		dummy->SetMesh(new Mesh(*(dummy->GetMesh())));
+		dummy->toggleUniqueMesh();
+		dummy->GetMesh()->SetTexture(texture);
+	}
 	rnode->AddChild(dummy);
 
 	rnode->SetTransform(Matrix4::Translation(pos));
 	rnode->SetBoundingRadius(radius);
 
-	PhysicsNode* pnode = NULL;	
+	PhysicsNode* pnode = NULL;
 	if (physics_enabled)
 	{
 		pnode = new PhysicsNode();
@@ -179,6 +185,7 @@ GameObject* CommonUtils::BuildCuboidObject(
 		pnode = new PhysicsNode();
 		pnode->SetPosition(pos);
 		pnode->SetInverseMass(inverse_mass);
+		//pnode->SetName(name);
 
 		if (!collidable)
 		{
@@ -202,6 +209,79 @@ GameObject* CommonUtils::BuildCuboidObject(
 			std::bind(&DragableObjectCallback, obj, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4)
 		);
 	}
-	
+
+	return obj;
+}
+
+GameObject* CommonUtils::BuildCombinedObject(
+	const std::string& name,
+	const Vector3& pos,
+	const float radius,
+	bool physics_enabled,
+	float inverse_mass,			//requires physics_enabled = true
+	bool collidable,				//requires physics_enabled = true
+	bool dragable,
+	const Vector4& color)
+{
+	//Due to the way SceneNode/RenderNode's were setup, we have to make a dummy node which has the mesh and scaling transform
+	// and a parent node that will contain the world transform/physics transform
+	RenderNode* rnode = new RenderNode();
+
+
+
+	RenderNode* cube = new RenderNode(CommonMeshes::Cube(), color);
+	cube->SetTransform(Matrix4::Scale(Vector3(radius, radius, radius)));
+	rnode->AddChild(cube);
+
+	RenderNode* sphere = new RenderNode(CommonMeshes::Sphere(), color);
+	sphere->SetTransform(Matrix4::Scale(Vector3(radius, radius, radius)) * Matrix4::Translation(Vector3(0, -radius, 0)));
+	rnode->AddChild(sphere);
+
+	rnode->SetTransform(Matrix4::Translation(pos));
+	rnode->SetBoundingRadius(radius * 2);
+
+	PhysicsNode* pnode = NULL;
+	if (physics_enabled)
+	{
+		pnode = new PhysicsNode();
+		pnode->SetPosition(pos);
+		pnode->SetInverseMass(inverse_mass);
+
+		//PhysicsNode* CubeNode = new PhysicsNode();
+		//PhysicsNode* SphereNode = new PhysicsNode();
+
+		//pnode->SetPosition(Vector3(0, -radius, 0));
+		//pnode->SetName(name);
+
+		if (!collidable)
+		{
+		//Even without a collision shape, the inertia matrix for rotation has to be derived from the objects shape
+		pnode->SetInverseInertia(CuboidCollisionShape(Vector3(radius,radius,radius)).BuildInverseInertia(inverse_mass));
+		}
+		else
+		{
+		CollisionShape* cube = new CuboidCollisionShape(Vector3(radius, radius, radius));
+		pnode->SetCollisionShape(cube);
+		//pnode->SetInverseInertia(cube->BuildInverseInertia(inverse_mass));
+
+		CollisionShape* sphere = new SphereCollisionShape(radius);
+		pnode->SetCollisionShape2(sphere);
+		
+		pnode->SetInverseInertia(sphere->BuildInverseInertia(inverse_mass) );
+		}
+
+		//pnode
+	}
+
+	GameObject* obj = new GameObject(name, rnode, pnode);
+
+	/*if (dragable)
+	{
+	ScreenPicker::Instance()->RegisterNodeForMouseCallback(
+	dummy, //Dummy is the rendernode that actually contains the drawable mesh
+	std::bind(&DragableObjectCallback, obj, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4)
+	);
+	}*/
+
 	return obj;
 }

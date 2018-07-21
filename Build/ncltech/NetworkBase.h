@@ -3,37 +3,37 @@ Class: NetworkBase
 Implements:
 Author: Pieran Marris      <p.marris@newcastle.ac.uk> and YOU!
 Description:
-	A simple wrapper to encapsulate the core functionality provided by ENET library.
+A simple wrapper to encapsulate the core functionality provided by ENET library.
 
-	In previous years, this would have been the class that handled all the sockets 
-	directly. However, ENET can do this for us now.. so this wrapper class only really
-	serves in keeping track of the network transfer rate in kilobits per second.
+In previous years, this would have been the class that handled all the sockets
+directly. However, ENET can do this for us now.. so this wrapper class only really
+serves in keeping track of the network transfer rate in kilobits per second.
 
-	ENET Overview
-	----------------
-	The ENET library is a nice low level library that sits directly on top of the sockets. 
-	Automatically handling packet reliability, network throttling, packet splitting and
-	other not so fun network tasks that previously made networking a pain to teach.
+ENET Overview
+----------------
+The ENET library is a nice low level library that sits directly on top of the sockets.
+Automatically handling packet reliability, network throttling, packet splitting and
+other not so fun network tasks that previously made networking a pain to teach.
 
-	The documentation is a little sparse, though in essecense each client will have it's own
-	ENetHost object that manages all incoming and outgoing packets. An ENetHost can have one or
-	more ENetPeer's connected at any given time which can communicated with via enet_peer_send(<packet with data>).
+The documentation is a little sparse, though in essecense each client will have it's own
+ENetHost object that manages all incoming and outgoing packets. An ENetHost can have one or
+more ENetPeer's connected at any given time which can communicated with via enet_peer_send(<packet with data>).
 
-	The packets sent between clients can each optionally be sent via:
-		- PACKET_TRANSPORT_UNRELABLE  (UDP)
-		  These packets are a simple fire and forget. If they get lost over the network or dropped through throttling
-		  we don't care. These are useful for time-sensitive data, which becomes obsolete after a given timeframe anyway.
-		  In ENET this bypasses most of the library infrastructure and simply gets sent as a standard UDP datagram.
+The packets sent between clients can each optionally be sent via:
+- PACKET_TRANSPORT_UNRELABLE  (UDP)
+These packets are a simple fire and forget. If they get lost over the network or dropped through throttling
+we don't care. These are useful for time-sensitive data, which becomes obsolete after a given timeframe anyway.
+In ENET this bypasses most of the library infrastructure and simply gets sent as a standard UDP datagram.
 
-		- PACKET_TRANSPORT_RELIABLE  (~TCP)
-		  These packets are tracked over the network with ACK's (acknowledgement identifier). Each packet to and from the peer's
-		  will contain an additional ACK field informing the peer which packets it has previously recieved. If, after a given
-		  timeframe, the peer has not recieved our packet (due to the ACK ID's not being contiguous) it will be re-sent.
-		  This process continues until the peer acknoledges it has recieved our packet. This means we can make no assumptions
-		  about when the packet will arrive, but we can assert that it /will/ arrive eventually. ENET accomplishes this by emulating
-		  it's own variation of the TCP protocol on top of the existing UDP socket.
+- PACKET_TRANSPORT_RELIABLE  (~TCP)
+These packets are tracked over the network with ACK's (acknowledgement identifier). Each packet to and from the peer's
+will contain an additional ACK field informing the peer which packets it has previously recieved. If, after a given
+timeframe, the peer has not recieved our packet (due to the ACK ID's not being contiguous) it will be re-sent.
+This process continues until the peer acknoledges it has recieved our packet. This means we can make no assumptions
+about when the packet will arrive, but we can assert that it /will/ arrive eventually. ENET accomplishes this by emulating
+it's own variation of the TCP protocol on top of the existing UDP socket.
 
-	For more information see: http://enet.bespin.org/Features.html
+For more information see: http://enet.bespin.org/Features.html
 
 *//////////////////////////////////////////////////////////////////////////////
 
@@ -47,8 +47,8 @@ enum PacketTransportType
 	//Packet will be sent, but may be lost in transit
 	// - Best for regular updates that are time-sensitive e.g. position updates
 	// - See UDP Protocol
-	PACKET_TRANSPORT_UNRELABLE = 0,								
-	
+	PACKET_TRANSPORT_UNRELABLE = 0,
+
 	//Packet will be sent and tracked, resending after timeout if peer has not recieved it yet
 	// - Best for data that MUST reach the client, no matter how long (or how many attempts) it takes e.g. game start/end and player deaths
 	// - See TCP Protocol

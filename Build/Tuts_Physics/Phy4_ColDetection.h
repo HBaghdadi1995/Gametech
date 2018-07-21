@@ -46,8 +46,7 @@ public:
 				0.0f,									//Infinite Mass
 				true,									//Has Collision Shape
 				true,									//Dragable by the user
-				//CommonUtils::GenColor(0.4f, 0.5f)
-				Vector4(1,0,0,1)));	//Color
+				CommonUtils::GenColor(0.45f, 0.5f)));	//Color
 
 			this->AddGameObject(CommonUtils::BuildSphereObject("",
 				ss_pos,									//Position
@@ -56,8 +55,7 @@ public:
 				0.0f,									//Infinite Mass
 				true,									//Has Collision Shape
 				true,									//Dragable by the user
-				//CommonUtils::GenColor(0.5f, 1.0f)
-				Vector4(0, 1, 0, 1)));	//Color
+				CommonUtils::GenColor(0.5f, 1.0f)));	//Color
 		}
 
 		//Create Sphere-Cuboid Manifold Test

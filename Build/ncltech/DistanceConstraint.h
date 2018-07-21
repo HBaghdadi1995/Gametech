@@ -1,16 +1,16 @@
 /******************************************************************************
 Class: DistanceConstraint
 Implements:
-Author: 
-	Pieran Marris      <p.marris@newcastle.ac.uk> and YOU!
+Author:
+Pieran Marris      <p.marris@newcastle.ac.uk> and YOU!
 Description:
 
-	Manages a distance constraint between two objects, ensuring the two objects never
-	seperate. It works on the velocity level, enforcing the constraint:
-		dot([(velocity of B) - (velocity of A)], normal) = zero
-	
-	Which is the same as saying, if the velocity of the two objects in the direction of the constraint is zero
-	then we can assert that the two objects will not move further or closer together and thus satisfy the constraint.
+Manages a distance constraint between two objects, ensuring the two objects never
+seperate. It works on the velocity level, enforcing the constraint:
+dot([(velocity of B) - (velocity of A)], normal) = zero
+
+Which is the same as saying, if the velocity of the two objects in the direction of the constraint is zero
+then we can assert that the two objects will not move further or closer together and thus satisfy the constraint.
 
 *//////////////////////////////////////////////////////////////////////////////
 
@@ -79,6 +79,7 @@ public:
 			b = -(bumgarte_scalar / PhysicsEngine::Instance()->GetDeltaTime()) * distance_offset;
 
 			float jn = -(abnVel + b) / constraintMass;
+			//float jn = (distance_offset *0.01) / (constraintMass * PhysicsEngine::Instance()->GetDeltaTime()) - (abnVel * 0.01);
 
 			pnodeA->SetLinearVelocity(pnodeA->GetLinearVelocity() + abn * (pnodeA->GetInverseMass() * jn));
 			pnodeB->SetLinearVelocity(pnodeB->GetLinearVelocity() - abn * (pnodeB->GetInverseMass() * jn));

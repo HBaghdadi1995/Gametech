@@ -1,20 +1,20 @@
 /******************************************************************************
 Class: SceneManager
-Implements: 
-	SceneRenderer, TSingleton
-Author: 
-	Pieran Marris <p.marris@newcastle.ac.uk>
+Implements:
+SceneRenderer, TSingleton
+Author:
+Pieran Marris <p.marris@newcastle.ac.uk>
 Description:
-	Extends the SceneRenderer to provide means to have multiple enqueued Scenes that
-	can be switched between easily. Scenes can be enqueued at the start of the program
-	by calling SceneManager::Instance()->EnqueueScene(new <MyScene>("Friendly Scene Name?"));
-	If it is the first Scene to be enqueued, it will also instantly become the active scene
-	shown to the user.
+Extends the SceneRenderer to provide means to have multiple enqueued Scenes that
+can be switched between easily. Scenes can be enqueued at the start of the program
+by calling SceneManager::Instance()->EnqueueScene(new <MyScene>("Friendly Scene Name?"));
+If it is the first Scene to be enqueued, it will also instantly become the active scene
+shown to the user.
 
-	Scenes can be switched between by using one of the JumpToScene methods. This will
-	call <scene>->OnInitializeScene() and <oldscene>->OnCleanupScene() respectively and automatically.
+Scenes can be switched between by using one of the JumpToScene methods. This will
+call <scene>->OnInitializeScene() and <oldscene>->OnCleanupScene() respectively and automatically.
 
-	This class is a singleton, so is unique and can be accessed globally.
+This class is a singleton, so is unique and can be accessed globally.
 
 *//////////////////////////////////////////////////////////////////////////////
 
@@ -44,13 +44,13 @@ public:
 
 
 	//Get currently active scene (returns NULL if no scenes yet added)
-	inline Scene* GetCurrentScene()			{ return scene; }
+	inline Scene* GetCurrentScene() { return scene; }
 
 	//Get currently active scene's index (return 0 if no scenes yet added)
-	inline uint   GetCurrentSceneIndex()	{ return m_SceneIdx; }
+	inline uint   GetCurrentSceneIndex() { return m_SceneIdx; }
 
 	//Get total number of enqueued scenes
-	inline uint   SceneCount()				{ return m_vpAllScenes.size(); }
+	inline uint   SceneCount() { return m_vpAllScenes.size(); }
 
 
 protected:

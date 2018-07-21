@@ -1,7 +1,6 @@
 #version 330 core
-#define SHADOWMAP_NUM  3
-
-#define SHADOWMAP_NUM_VERTS  9
+#define SHADOWMAP_NUM  4
+#define SHADOWMAP_NUM_VERTS  12
 
 layout(triangles) in;
 layout(triangle_strip, max_vertices = SHADOWMAP_NUM_VERTS) out; 

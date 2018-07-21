@@ -1,13 +1,13 @@
 /******************************************************************************
 Class: CommonMeshes
 Implements:
-Author: 
-	Pieran Marris <p.marris@newcastle.ac.uk>
+Author:
+Pieran Marris <p.marris@newcastle.ac.uk>
 Description:
-	A quick and dirty library of common meshes, saves loading the same common meshes (cube, sphere etc) over and over again.
+A quick and dirty library of common meshes, saves loading the same common meshes (cube, sphere etc) over and over again.
 
-	These are loaded when the GraphicsPipeline is first initialised and released when it is deleted, so can
-	be globally accessed for the entirity of any Scene/GameObject.
+These are loaded when the GraphicsPipeline is first initialised and released when it is deleted, so can
+be globally accessed for the entirity of any Scene/GameObject.
 
 *//////////////////////////////////////////////////////////////////////////////
 
@@ -26,15 +26,15 @@ public:
 	// e.g RenderNode* cube_copy = new RenderNode(*CommonMeshes::Cube());
 
 	//Cube
-	static Mesh* Cube()			{ return m_pCube; }
+	static Mesh* Cube() { return m_pCube; }
 
 	//Sphere
-	static Mesh* Sphere()		{ return m_pSphere; }
+	static Mesh* Sphere() { return m_pSphere; }
 
 
 
 	//PhysicsEngine Checkerboard - Hidden here for reasons of laziness
-	static const GLuint CheckerboardTex()   { return m_pCheckerboardTex; }
+	static const GLuint CheckerboardTex() { return m_pCheckerboardTex; }
 
 
 protected:

@@ -1,29 +1,29 @@
 /******************************************************************************
 Class: Scene
-Implements: 
-Author: 
-	Pieran Marris <p.marris@newcastle.ac.uk>
-Description: 
+Implements:
+Author:
+Pieran Marris <p.marris@newcastle.ac.uk>
+Description:
 
-	The Scene class is an extrapolation of the Scene Management tutorial 
-	from Graphics for Games module. It contains a flat list of GameObject's, which in
-	turn may have scene (old SceneNode's) or PhysicsNodes. The scene's responsibility
-	is to automatically initiate and destroy those game objects on demand.
+The Scene class is an extrapolation of the Scene Management tutorial
+from Graphics for Games module. It contains a flat list of GameObject's, which in
+turn may have scene (old SceneNode's) or PhysicsNodes. The scene's responsibility
+is to automatically initiate and destroy those game objects on demand.
 
-	With the addition of the SceneManager class, multiple scenes can cohexist within the same
-	program meaning the same Scene could be initialied/cleaned up multiple times. The standard procedure
-	for a Scene lifespan follows:-
-		1. Constructor()		 [Program Start]
-		2. OnInitializeScene()	 [Scene Focus]
-		3. OnCleanupScene()		 [Scene Lose Focus]
-		4. Deconsructor()		 [Program End]
+With the addition of the SceneManager class, multiple scenes can cohexist within the same
+program meaning the same Scene could be initialied/cleaned up multiple times. The standard procedure
+for a Scene lifespan follows:-
+1. Constructor()		 [Program Start]
+2. OnInitializeScene()	 [Scene Focus]
+3. OnCleanupScene()		 [Scene Lose Focus]
+4. Deconsructor()		 [Program End]
 
-	Once an object is added to the scene via AddGameObject(), the object is managed by the Scene. 
-	This means that it will automatically call delete on any objects you have added when the scene 
-	becomes innactive (lose focus). To override this you will need to override the OnCleanupScene method
-	and handle cleanup of Objects yourself.
+Once an object is added to the scene via AddGameObject(), the object is managed by the Scene.
+This means that it will automatically call delete on any objects you have added when the scene
+becomes innactive (lose focus). To override this you will need to override the OnCleanupScene method
+and handle cleanup of Objects yourself.
 
-	For example usage see Tuts_Physics project.
+For example usage see Tuts_Physics project.
 
 *//////////////////////////////////////////////////////////////////////////////
 #pragma once
@@ -54,7 +54,7 @@ class Scene
 public:
 	Scene(const std::string& friendly_name)	//Called once at program start - all scene initialization should be done in 'OnInitializeScene'
 		: m_SceneName(friendly_name)
-	{}; 
+	{};
 
 	~Scene()
 	{
@@ -65,13 +65,13 @@ public:
 
 	// Called when scene is being activated, and will begin being rendered/updated. 
 	//	 - Initialize objects/physics here
-	virtual void OnInitializeScene()	{}		
+	virtual void OnInitializeScene() {}
 
 	// Called when scene is being swapped and will no longer be rendered/updated 
 	//	 - Override to remove custom objects/physics here as needed
 	//	   Note: Default action here automatically delete all game objects and
 	//           remove all update callback's.
-	virtual void OnCleanupScene()		{ DeleteAllGameObjects(); };	
+	virtual void OnCleanupScene() { DeleteAllGameObjects(); };
 
 	// Update Scene Logic
 	//   - Called once per frame and should contain time-sensitive update logic
@@ -99,7 +99,7 @@ public:
 	{
 		if (game_object)
 		{
-			if (game_object->scene) game_object->scene->RemoveGameObject(game_object);				
+			if (game_object->scene) game_object->scene->RemoveGameObject(game_object);
 
 			m_vpObjects.push_back(game_object);
 			game_object->scene = this;
@@ -143,7 +143,7 @@ public:
 	// The friendly name associated with this scene instance
 	const std::string& GetSceneName() { return m_SceneName; }
 
-	
+
 	//Add update callback
 	//  Any game object (or otherwise) can start listening for game update's, which will
 	//  be fired once per frame with a 'float dt' parameter that will describe the seconds since the 
@@ -179,7 +179,7 @@ protected:
 
 		for (auto obj : m_vpObjects)
 			delete obj;
-		
+
 		m_vpObjects.clear();
 	}
 

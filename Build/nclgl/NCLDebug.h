@@ -212,7 +212,7 @@ protected:
 	static void _SortRenderLists();
 	static void _BuildTextBackgrounds();
 	static void _BuildRenderVBO();
-	static void _RenderDrawlist(size_t* offsets);
+	static void _RenderDrawlist(uint* offsets);
 
 
 	//Hacky Win32 version of creating basic font texture
@@ -244,7 +244,7 @@ protected:
 	static Shader*	g_pShaderText;
 
 	static GLuint	g_glArr, g_glBuf;
-	static size_t	g_glBufOffsets[9];
+	static uint		g_glBufOffsets[9];
 	static GLuint   g_glBufCapacity;
 	static Vector4* g_glBufPtr;
 

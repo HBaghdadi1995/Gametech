@@ -3,7 +3,7 @@
 #include <enet\enet.h>  //<-- MUST include this before "<nclgl\Window.h>"
 
 #include <nclgl\Window.h>
-#include <ncltech\PhysicsEngine.h>
+#include <ncltech\PhysicsEngine.cpp>
 #include <ncltech\SceneManager.h>
 #include <nclgl\NCLDebug.h>
 #include <nclgl\PerfTimer.h>
@@ -14,6 +14,7 @@ void Quit(bool error = false, const string &reason = "");
 
 void Initialize()
 {
+	srand(time(NULL));
 	//Initialise the Window
 	if (!Window::Initialise("Game Technologies - Collision Resolution", 1280, 800, false))
 		Quit(true, "Window failed to initialise!");
@@ -44,9 +45,9 @@ void Quit(bool error, const string &reason) {
 	PhysicsEngine::Release();
 	enet_deinitialize();  //!!!!!!!!!!!!!!!!!NEW!!!!!!!!!!!!!!
 	Window::Destroy();
-	
 
-						  //Show console reason before exit
+
+	//Show console reason before exit
 	if (error) {
 		std::cout << reason << std::endl;
 		system("PAUSE");
@@ -114,7 +115,7 @@ int main()
 		//Start Timing
 		float dt = Window::GetWindow().GetTimer()->GetTimedMS() * 0.001f;	//How many milliseconds since last update?
 
-		//Print Status Entries
+																			//Print Status Entries
 		PrintStatusEntries();
 
 		//Handle Keyboard Inputs

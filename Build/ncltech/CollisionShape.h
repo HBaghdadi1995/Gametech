@@ -1,18 +1,18 @@
 /******************************************************************************
 Class: CollisionShape
 Implements:
-Author: 
-	Pieran Marris      <p.marris@newcastle.ac.uk> and YOU!
-Description: 
+Author:
+Pieran Marris      <p.marris@newcastle.ac.uk> and YOU!
+Description:
 
-	A Generic template for all the functionality needed to represent a convex collision shape. 
+A Generic template for all the functionality needed to represent a convex collision shape.
 
-	This will be the only thing in the physics engine that defines the geometric shape of the
-	attached PhysicsNode. It provides a means for computing the interia tensor (rotational mass)
-	and a means to calculate collisions with other unknown collision shapes via CollisionDetectionSAT.
+This will be the only thing in the physics engine that defines the geometric shape of the
+attached PhysicsNode. It provides a means for computing the interia tensor (rotational mass)
+and a means to calculate collisions with other unknown collision shapes via CollisionDetectionSAT.
 
-	For example usage, see SphereCollisionShape (implicit shape defined by an algorithm - in this case bounding radius)
-	and CuboidCollisionShape (physical shape defined by a set of vertices/faces)
+For example usage, see SphereCollisionShape (implicit shape defined by an algorithm - in this case bounding radius)
+and CuboidCollisionShape (physical shape defined by a set of vertices/faces)
 
 *//////////////////////////////////////////////////////////////////////////////
 
@@ -32,7 +32,7 @@ class PhysicsNode;
 
 struct CollisionEdge
 {
-	CollisionEdge(const Vector3& a, const Vector3& b) 
+	CollisionEdge(const Vector3& a, const Vector3& b)
 		: _v0(a), _v1(b) {}
 
 	Vector3 _v0;
@@ -43,7 +43,7 @@ class CollisionShape
 {
 public:
 	CollisionShape() : m_Parent(NULL) {}
-	virtual ~CollisionShape()	{}
+	virtual ~CollisionShape() {}
 
 	// Constructs an inverse inertia matrix of the given collision volume. This is the equivilant of the inverse mass of an object for rotation,
 	//   a good source for non-inverse inertia matricies can be found here: https://en.wikipedia.org/wiki/List_of_moments_of_inertia
@@ -53,14 +53,14 @@ public:
 	virtual void DebugDraw() const {};
 
 	inline void SetParent(PhysicsNode* node) { m_Parent = node; }
-	inline		 PhysicsNode* Parent()		 { return m_Parent; }
+	inline		 PhysicsNode* Parent() { return m_Parent; }
 	inline const PhysicsNode* Parent() const { return m_Parent; }
 
 	virtual void	SetRadius(float radius) = 0;
 	virtual float	GetRadius() const = 0;
 
 
-//<----- USED BY COLLISION DETECTION ----->
+	//<----- USED BY COLLISION DETECTION ----->
 	// Get all collision axes between the current shape and the given
 	// object to be tested. The axes returned are just for the shape in question
 	// the other shape will also have it's own axes to test.
@@ -73,7 +73,7 @@ public:
 
 	// Get the min/max vertices along a given axis
 	virtual void GetMinMaxVertexOnAxis(
-		const Vector3& axis, 
+		const Vector3& axis,
 		Vector3& out_min,
 		Vector3& out_max) const = 0;
 

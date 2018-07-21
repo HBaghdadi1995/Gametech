@@ -8,8 +8,8 @@ namespace GeometryUtils
 {
 	struct Edge
 	{
-		Edge() : _v0(0.0f, 0.0f, 0.0f) , _v1(0.0f, 0.0f, 0.0f) {}
-		Edge(Vector3 start, Vector3 end) : _v0(start) , _v1(end) {}
+		Edge() : _v0(0.0f, 0.0f, 0.0f), _v1(0.0f, 0.0f, 0.0f) {}
+		Edge(Vector3 start, Vector3 end) : _v0(start), _v1(end) {}
 
 
 		Vector3 _v0;

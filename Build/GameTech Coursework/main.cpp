@@ -6,14 +6,15 @@
 
 #include "TestScene.h"
 #include "EmptyScene.h"
+#include "BallPool.h"
 
 const Vector4 status_colour = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
 const Vector4 status_colour_header = Vector4(0.8f, 0.9f, 1.0f, 1.0f);
 
 bool show_perf_metrics = false;
+bool draw_performance = false;
 PerfTimer timer_total, timer_physics, timer_update, timer_render;
 uint shadowCycleKey = 4;
-
 
 // Program Deconstructor
 //  - Releases all global components and memory
@@ -52,7 +53,7 @@ void Initialize()
 
 	//Enqueue All Scenes
 	SceneManager::Instance()->EnqueueScene(new TestScene("GameTech #1 - Framework Sandbox!"));
-	SceneManager::Instance()->EnqueueScene(new EmptyScene("GameTech #2 - Peace and quiet"));
+	SceneManager::Instance()->EnqueueScene(new BallPool("GameTech #2 - Peace and quiet"));
 	SceneManager::Instance()->EnqueueScene(new EmptyScene("GameTech #3 - More peace and quiet"));
 }
 
@@ -61,6 +62,7 @@ void Initialize()
 //    hand corner of the screen each frame.
 void PrintStatusEntries()
 {
+	const Vector4 status_color_performance = Vector4(1.0f, 0.6f, 0.6f, 1.0f);
 	//Print Engine Options
 	NCLDebug::AddStatusEntry(status_colour_header, "NCLTech Settings");
 	NCLDebug::AddStatusEntry(status_colour, "     Physics Engine: %s (Press P to toggle)", PhysicsEngine::Instance()->IsPaused() ? "Paused  " : "Enabled ");
@@ -72,7 +74,7 @@ void PrintStatusEntries()
 		SceneManager::Instance()->GetCurrentSceneIndex() + 1,
 		SceneManager::Instance()->SceneCount(),
 		SceneManager::Instance()->GetCurrentScene()->GetSceneName().c_str()
-		);
+	);
 	NCLDebug::AddStatusEntry(status_colour, "     \x01 T/Y to cycle or R to reload scene");
 
 	//Print Performance Timers
@@ -83,7 +85,16 @@ void PrintStatusEntries()
 		timer_update.PrintOutputToStatusEntry(status_colour, "          Scene Update   :");
 		timer_physics.PrintOutputToStatusEntry(status_colour, "          Physics Update :");
 		timer_render.PrintOutputToStatusEntry(status_colour, "          Render Scene   :");
+		NCLDebug::AddStatusEntry(status_color_performance, "--- Performance [H] ---");
+		if (draw_performance)
+		{
+			timer_total.PrintOutputToStatusEntry(status_color_performance, "Frame Total     :");
+			timer_physics.PrintOutputToStatusEntry(status_color_performance, "Physics Total   :");
+			PhysicsEngine::Instance()->PrintPerformanceTimers(status_color_performance);
+			NCLDebug::AddStatusEntry(status_color_performance, "");
+		}
 	}
+	NCLDebug::AddStatusEntry(Vector4(1, 0, 0, 1), "score: " + std::to_string(PhysicsEngine::Instance()->GetScore()));
 	NCLDebug::AddStatusEntry(status_colour, "");
 }
 
@@ -113,6 +124,10 @@ void HandleKeyboardInputs()
 
 	if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_G))
 		show_perf_metrics = !show_perf_metrics;
+
+	if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_H))
+		draw_performance = !draw_performance;
+
 }
 
 
@@ -126,11 +141,11 @@ int main()
 	Window::GetWindow().GetTimer()->GetTimedMS();
 
 	//Create main game-loop
-	while (Window::GetWindow().UpdateWindow() && !Window::GetKeyboard()->KeyDown(KEYBOARD_ESCAPE)) {
+	while (Window::GetWindow().UpdateWindow() && !(Window::GetKeyboard()->KeyDown(KEYBOARD_ESCAPE) || Window::GetKeyboard()->KeyDown(KEYBOARD_X))) {
 		//Start Timing
-		
+
 		float dt = Window::GetWindow().GetTimer()->GetTimedMS() * 0.001f;	//How many milliseconds since last update?
-																		//Update Performance Timers (Show results every second)
+																			//Update Performance Timers (Show results every second)
 		timer_total.UpdateRealElapsedTime(dt);
 		timer_physics.UpdateRealElapsedTime(dt);
 		timer_update.UpdateRealElapsedTime(dt);
@@ -142,7 +157,7 @@ int main()
 		//Handle Keyboard Inputs
 		HandleKeyboardInputs();
 
-		
+
 		timer_total.BeginTimingSection();
 
 		//Update Scene
@@ -164,14 +179,14 @@ int main()
 			//Forces synchronisation if vsync is disabled
 			// - This is solely to allow accurate estimation of render time
 			// - We should NEVER normally lock our render or game loop!		
-		//	glClientWaitSync(glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, NULL), GL_SYNC_FLUSH_COMMANDS_BIT, 1000000);
+			//	glClientWaitSync(glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, NULL), GL_SYNC_FLUSH_COMMANDS_BIT, 1000000);
 		}
 		timer_render.EndTimingSection();
 
-		
+
 
 		//Finish Timing
-		timer_total.EndTimingSection();		
+		timer_total.EndTimingSection();
 	}
 
 	//Cleanup

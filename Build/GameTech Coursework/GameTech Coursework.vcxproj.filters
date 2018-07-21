@@ -21,6 +21,9 @@
     <ClCompile Include="TestScene.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="BallPool.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="EmptyScene.h">
@@ -29,5 +32,21 @@
     <ClInclude Include="TestScene.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="BallPool.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CudaCommon.cuh" />
+    <ClInclude Include="helper_math.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderNodeParticles.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="CudaCollidingParticles.cuh" />
+  </ItemGroup>
+  <ItemGroup>
+    <CudaCompile Include="CudaCollidingParticles.cu" />
   </ItemGroup>
 </Project>

@@ -102,6 +102,18 @@ public:
 	inline bool GetVsyncEnabled() const { return isVsyncEnabled; }
 	inline void SetVsyncEnabled(bool enabled) { wglSwapIntervalEXT((isVsyncEnabled = enabled) ? 1 : 0); }
 
+	inline Matrix4& GetProjMtx() { return projMatrix; }
+	inline Matrix4& GetViewMtx() { return viewMatrix; }
+
+	inline Matrix4& GetShadowViewMtx() { return shadowViewMtx; }
+	inline Matrix4* GetShadowProjMatrices() { return shadowProj; }
+	inline Matrix4* GetShadowProjViewMatrices() { return shadowProjView; }
+
+	inline Vector3& GetAmbientColor() { return ambientColor; }
+	inline Vector3& GetLightDirection() { return lightDirection; }
+	inline float& GetSpecularFactor() { return specularFactor; }
+	inline GLuint& GetShadowTex() { return shadowTex; }
+
 protected:
 	GraphicsPipeline();
 	virtual ~GraphicsPipeline();
@@ -112,7 +124,7 @@ protected:
 	void UpdateAssets(int width, int height);
 	void BuildAndSortRenderLists();
 	void RecursiveAddToRenderLists(RenderNode* node);
-	void RenderAllObjects(bool renderTransparentBothSides, std::function<void(RenderNode*)> perObjectFunc = NULL);
+	void RenderAllObjects(bool isShadowPass, std::function<void(RenderNode*)> perObjectFunc = NULL);
 	void BuildShadowTransforms(); //Builds the shadow projView matrices
 
 protected:
@@ -143,6 +155,8 @@ protected:
 	GLuint	shadowFBO;
 	GLuint	shadowTex;
 	Matrix4	shadowProj[SHADOWMAP_NUM];
+	Matrix4	shadowViewMtx;
+	Matrix4	shadowProjView[SHADOWMAP_NUM];
 	float   normalizedFarPlanes[SHADOWMAP_NUM - 1];
 
 	//Common

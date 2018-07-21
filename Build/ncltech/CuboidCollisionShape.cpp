@@ -69,7 +69,7 @@ Matrix3 CuboidCollisionShape::BuildInverseInertia(float invMass) const
 	inertia._11 = 12.f * invMass / (dimsSq.y + dimsSq.z);
 	inertia._22 = 12.f * invMass / (dimsSq.x + dimsSq.z);
 	inertia._33 = 12.f * invMass / (dimsSq.x + dimsSq.y);
-	
+
 	return inertia;
 }
 
@@ -246,16 +246,16 @@ void CuboidCollisionShape::ConstructCubeHull()
 {
 	//Vertices
 	cubeHull.AddVertex(Vector3(-1.0f, -1.0f, -1.0f));		// 0
-	cubeHull.AddVertex(Vector3(-1.0f,  1.0f, -1.0f));		// 1
-	cubeHull.AddVertex(Vector3( 1.0f,  1.0f, -1.0f));		// 2
-	cubeHull.AddVertex(Vector3( 1.0f, -1.0f, -1.0f));		// 3
+	cubeHull.AddVertex(Vector3(-1.0f, 1.0f, -1.0f));		// 1
+	cubeHull.AddVertex(Vector3(1.0f, 1.0f, -1.0f));		// 2
+	cubeHull.AddVertex(Vector3(1.0f, -1.0f, -1.0f));		// 3
 
-	cubeHull.AddVertex(Vector3(-1.0f, -1.0f,  1.0f));		// 4
-	cubeHull.AddVertex(Vector3(-1.0f,  1.0f,  1.0f));		// 5
-	cubeHull.AddVertex(Vector3( 1.0f,  1.0f,  1.0f));		// 6
-	cubeHull.AddVertex(Vector3( 1.0f, -1.0f,  1.0f));		// 7
+	cubeHull.AddVertex(Vector3(-1.0f, -1.0f, 1.0f));		// 4
+	cubeHull.AddVertex(Vector3(-1.0f, 1.0f, 1.0f));		// 5
+	cubeHull.AddVertex(Vector3(1.0f, 1.0f, 1.0f));		// 6
+	cubeHull.AddVertex(Vector3(1.0f, -1.0f, 1.0f));		// 7
 
-	//Indices ( MUST be provided in ccw winding order )
+														//Indices ( MUST be provided in ccw winding order )
 	int face1[] = { 0, 1, 2, 3 };
 	int face2[] = { 7, 6, 5, 4 };
 	int face3[] = { 5, 6, 2, 1 };
