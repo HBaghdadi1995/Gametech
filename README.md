@@ -21,7 +21,7 @@ The Physics and Networks demonstrations can be accessed from diffirent projects
 
 ### Physics
 #### Running the Project
-Visual Studio as well as an OpenGL 3.1 and CUDA enabled GPU is required to generate the executables, to generate them, set GameTech Coursework as the startup project then select any configuration and x64 as the platform, finally click on build or the local windows debugger.
+Visual Studio as well as an OpenGL 3.1 and CUDA enabled GPU are required to generate the executables, to generate them, set GameTech Coursework as the startup project then select any configuration and x64 as the platform, finally click on build or the local windows debugger.
 
 _Note: Release mode will have a higher frame rate than Debug Mode_
 
