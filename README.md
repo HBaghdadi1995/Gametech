@@ -79,3 +79,9 @@ To run a second client run the executable of that file. This will allow both cli
 * __Mouse Drag__: Change Pitch and Yaw (Drag boxes when highlighting them)
 
 * __ESC__: Quit
+
+## Citations
+* OpenGL code based on [Newcastle University Game Technologies Framework](
+
+## Citations
+* OpenGL code based on [Newcastle University Graphics Framework](https://research.ncl.ac.uk/game/mastersdegree/graphicsforgames/)
